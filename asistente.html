@@ -1,261 +1,223 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MARÍA - JAVELA CATÁLOGOS</title>
-
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:#fff;
+      background:linear-gradient(rgba(0,13,42,.18),rgba(0,13,42,.2)),url("fondo-javela.png") center/cover fixed;
+      display:flex;justify-content:center;align-items:center;padding:22px
     }
-
-    body {
-      min-height: 100vh;
-      font-family: Arial, sans-serif;
-      color: white;
-      background:
-        linear-gradient(rgba(0, 13, 42, 0.12), rgba(0, 13, 42, 0.12)),
-        url("fondo-javela.png") center center / cover fixed;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow-x: hidden;
-    }
-
-    .pantalla {
-      width: 100%;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 35px 20px;
-    }
-
-    .mensaje {
-      color: #ffd878;
-      font-family: Georgia, serif;
-      font-size: clamp(25px, 3.2vw, 36px);
-      font-weight: bold;
-      margin-bottom: 30px;
-      text-shadow: 0 0 15px rgba(255, 190, 50, 0.25);
-    }
-
-    .avatar {
-      width: 260px;
-      max-width: 55vw;
-      height: auto;
-      object-fit: contain;
-      margin-bottom: 28px;
-      filter: drop-shadow(0 0 20px rgba(0, 120, 255, 0.35));
-    }
-
-    .boton-microfono {
-      min-width: 390px;
-      padding: 17px 30px;
-      border: 2px solid #d9ad48;
-      border-radius: 16px;
-      background: linear-gradient(135deg, #063b83, #001b49);
-      color: #ffffff;
-      font-size: 19px;
-      font-weight: bold;
-      letter-spacing: 1.5px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      box-shadow:
-        0 0 15px rgba(0, 115, 255, 0.45),
-        inset 0 0 12px rgba(255, 215, 120, 0.08);
-      transition: 0.25s ease;
-    }
-
-    .boton-microfono:hover {
-      transform: scale(1.04);
-      box-shadow:
-        0 0 25px rgba(0, 145, 255, 0.65),
-        0 0 12px rgba(255, 195, 70, 0.3);
-    }
-
-    .icono-circular {
-      width: 42px;
-      height: 42px;
-      min-width: 42px;
-      border: 2px solid #d9ad48;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #0753a5, #001638);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 12px rgba(0, 140, 255, 0.5);
-    }
-
-    .icono-circular svg {
-      width: 21px;
-      height: 21px;
-      fill: none;
-      stroke: white;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .estado {
-      margin-top: 22px;
-      font-size: 15px;
-      color: #d9eaff;
-      text-shadow: 0 0 8px #006eff;
-      max-width: 760px;
-      line-height: 1.5;
-    }
-
-    .transcripcion {
-      width: min(90%, 650px);
-      min-height: 48px;
-      margin-top: 14px;
-      padding: 12px 16px;
-      border: 1px solid rgba(217, 173, 72, .65);
-      border-radius: 12px;
-      background: rgba(0, 18, 48, .72);
-      color: #fff;
-      line-height: 1.5;
-      overflow-wrap: anywhere;
-    }
-
-    @media (max-width: 600px) {
-      .pantalla {
-        padding: 25px 15px;
-      }
-
-      .mensaje {
-        font-size: 25px;
-      }
-
-      .avatar {
-        width: 260px;
-      }
-
-      .boton-microfono {
-        min-width: 0;
-        width: 95%;
-        max-width: 390px;
-        font-size: 15px;
-        padding: 13px 15px;
-        gap: 12px;
-      }
-    }
+    .pantalla{width:min(100%,820px);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 14px}
+    .mensaje{color:#ffd878;font-family:Georgia,serif;font-size:clamp(25px,3vw,36px);margin:0 0 12px;text-shadow:0 0 15px rgba(255,190,50,.25)}
+    .avatar{width:150px;max-width:42vw;height:auto;object-fit:contain;margin:0 auto 12px;filter:drop-shadow(0 0 20px rgba(0,120,255,.35))}
+    .estado{margin:8px 0 14px;color:#e5f1ff;text-shadow:0 0 8px #006eff;line-height:1.5;min-height:24px}
+    .conversacion{width:min(100%,720px);height:260px;overflow:auto;background:rgba(0,18,48,.78);border:1px solid rgba(217,173,72,.75);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;text-align:left}
+    .burbuja{max-width:88%;padding:11px 14px;border-radius:14px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+    .usuario{align-self:flex-end;background:#dce9f8;color:#173b68;border-bottom-right-radius:4px}
+    .maria{align-self:flex-start;background:#17477f;color:white;border:1px solid rgba(255,215,120,.35);border-bottom-left-radius:4px}
+    .controles{display:flex;gap:10px;width:min(100%,720px);margin-top:14px}
+    button{border:1px solid #d9ad48;border-radius:12px;padding:14px 18px;font-size:15px;font-weight:bold;cursor:pointer}
+    button:disabled{opacity:.55;cursor:not-allowed}
+    #hablar{flex:1;background:linear-gradient(135deg,#063b83,#001b49);color:white;box-shadow:0 0 15px rgba(0,115,255,.4)}
+    .entrada{display:flex;gap:9px;width:min(100%,720px);margin-top:10px}
+    input{flex:1;min-width:0;border:1px solid #d9ad48;border-radius:10px;padding:13px;font-size:15px;background:rgba(0,18,48,.88);color:#fff}
+    input::placeholder{color:#c5d8ef}
+    #enviar{background:#d9ad48;color:#172f4c}
+    .pie{display:flex;justify-content:space-between;align-items:center;gap:12px;width:min(100%,720px);margin-top:12px;font-size:12px;color:#d8e6f8}
+    #cerrar{padding:8px 11px;background:rgba(0,18,48,.8);color:#ffdc83;font-size:12px}
+    @media(max-width:600px){body{padding:8px}.pantalla{padding:20px 8px}.avatar{width:125px}.conversacion{height:250px}.controles{flex-direction:column}.pie{align-items:flex-start}}
   </style>
 </head>
-
 <body>
-
   <main class="pantalla">
+    <h1 class="mensaje">¿En qué puedo servirte o apoyarte hoy?</h1>
+    <img src="maria.png" alt="MARÍA - Asistente de JAVELA CATÁLOGOS" class="avatar">
+    <p class="estado" id="estado" role="status">Conectando con MARÍA...</p>
 
-    <h1 class="mensaje">
-      ¿En qué puedo servirte o apoyarte hoy?
-    </h1>
+    <section id="conversacion" class="conversacion" aria-live="polite">
+      <div class="burbuja maria">Hola, soy MARÍA. Puedes hablarme o escribirme y te responderé.</div>
+    </section>
 
-    <img
-      src="maria.png"
-      alt="MARÍA - Asistente de JAVELA CATÁLOGOS"
-      class="avatar"
-    >
-
-    <button class="boton-microfono" id="hablar">
-
-      <span class="icono-circular">
-        <svg viewBox="0 0 24 24">
-          <rect x="9" y="2" width="6" height="12" rx="3"></rect>
-          <path d="M5 10a7 7 0 0 0 14 0"></path>
-          <path d="M12 17v5"></path>
-          <path d="M8 22h8"></path>
-        </svg>
-      </span>
-
-      HABLAR CON MARÍA
-
-    </button>
-
-    <p class="estado" id="estado" aria-live="polite">
-      MARÍA está lista para escucharte. Pulsa el botón para comenzar.
-    </p>
-    <div class="transcripcion" id="transcripcion" aria-live="polite">
-      Aquí aparecerá lo que digas.
+    <div class="controles">
+      <button id="hablar" type="button" disabled>🎙 HABLAR CON MARÍA</button>
     </div>
 
+    <form id="formulario" class="entrada">
+      <input id="mensaje" type="text" maxlength="1500" placeholder="También puedes escribir aquí..." autocomplete="off" disabled>
+      <button id="enviar" type="submit" disabled>Enviar</button>
+    </form>
+
+    <div class="pie">
+      <span id="usuario">Acceso de prueba sin inicio de sesión</span>
+      <button id="cerrar" type="button">Finalizar conversación</button>
+    </div>
   </main>
 
-  <script>
-    const boton = document.getElementById("hablar");
-    const estado = document.getElementById("estado");
-    const transcripcion = document.getElementById("transcripcion");
-    const Reconocimiento = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let reconocimiento = null;
-    let escuchando = false;
+<script>
+  // La clave de OpenAI permanece en Google Apps Script. Nunca se incluye en GitHub.
+  const API_URL = 'https://script.google.com/macros/s/AKfycbwiljbo-WU0WmXa_i0IwbzGrc1G4DOTWfP8cNe0iDRvOCP8P47yc8lS7-N-nIOZRl6C2g/exec';
+  const estado = document.getElementById('estado');
+  const hablar = document.getElementById('hablar');
+  const enviar = document.getElementById('enviar');
+  const mensaje = document.getElementById('mensaje');
+  const conversacion = document.getElementById('conversacion');
+  const formulario = document.getElementById('formulario');
+  const cerrar = document.getElementById('cerrar');
 
-    if (!Reconocimiento) {
-      boton.disabled = true;
-      boton.style.opacity = "0.6";
-      estado.textContent = "Este navegador no ofrece reconocimiento de voz. Abre JAVELA CATÁLOGOS en Google Chrome actualizado.";
-    } else {
-      reconocimiento = new Reconocimiento();
-      reconocimiento.lang = "es-CO";
-      reconocimiento.continuous = false;
-      reconocimiento.interimResults = true;
+  let tokenMaria = '';
+  let previousResponseId = '';
+  let contadorJsonp = 0;
+  let reconocimientoActivo = null;
 
-      reconocimiento.onstart = () => {
-        escuchando = true;
-        boton.textContent = "🔴 ESCUCHANDO... (PULSA PARA DETENER)";
-        estado.textContent = "MARÍA te está escuchando. Habla ahora.";
+  function jsonp(parametros) {
+    return new Promise((resolve, reject) => {
+      const callback = 'mariaCallback_' + Date.now() + '_' + (++contadorJsonp);
+      const script = document.createElement('script');
+      const datos = new URLSearchParams({...parametros, callback});
+      let terminado = false;
+      const limpiar = () => {
+        if (terminado) return;
+        terminado = true;
+        clearTimeout(temporizador);
+        delete window[callback];
+        script.remove();
       };
+      window[callback] = respuesta => { limpiar(); resolve(respuesta); };
+      script.onerror = () => { limpiar(); reject(new Error('No se pudo comunicar con el servidor de JAVELA.')); };
+      const temporizador = setTimeout(() => { limpiar(); reject(new Error('El servidor tardó demasiado en responder. Inténtalo nuevamente.')); }, 45000);
+      script.src = API_URL + '?' + datos.toString();
+      document.head.appendChild(script);
+    });
+  }
 
-      reconocimiento.onresult = (evento) => {
-        let texto = "";
-        for (let i = evento.resultIndex; i < evento.results.length; i++) {
-          texto += evento.results[i][0].transcript;
-        }
-        transcripcion.textContent = texto || "Te estoy escuchando...";
-      };
+  function mostrarEstado(texto) { estado.textContent = texto; }
 
-      reconocimiento.onerror = (evento) => {
-        const mensajes = {
-          "not-allowed": "No hay permiso para usar el micrófono. Autorízalo en el navegador.",
-          "audio-capture": "No se detectó un micrófono conectado o disponible.",
-          "no-speech": "No detecté voz. Pulsa el botón e inténtalo de nuevo.",
-          "network": "El reconocimiento de voz necesita conexión a internet. Revisa tu conexión."
-        };
-        estado.textContent = mensajes[evento.error] || "No se pudo reconocer la voz. Inténtalo de nuevo.";
-      };
+  function agregarBurbuja(texto, tipo) {
+    const div = document.createElement('div');
+    div.className = 'burbuja ' + tipo;
+    div.textContent = texto;
+    conversacion.appendChild(div);
+    conversacion.scrollTop = conversacion.scrollHeight;
+  }
 
-      reconocimiento.onend = () => {
-        escuchando = false;
-        boton.innerHTML = '<span class="icono-circular"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"></rect><path d="M5 10a7 7 0 0 0 14 0"></path><path d="M12 17v5"></path><path d="M8 22h8"></path></svg></span> HABLAR CON MARÍA';
-        if (transcripcion.textContent !== "Aquí aparecerá lo que digas.") {
-          estado.textContent = "Listo. MARÍA recibió tu voz y mostró el texto.";
-        }
-      };
+  function activarControles(activo) {
+    hablar.disabled = !activo;
+    mensaje.disabled = !activo;
+    enviar.disabled = !activo;
+  }
 
-      boton.addEventListener("click", () => {
-        if (escuchando) {
-          reconocimiento.stop();
-          estado.textContent = "Deteniendo el micrófono...";
-          return;
-        }
-        transcripcion.textContent = "Aquí aparecerá lo que digas.";
-        try {
-          reconocimiento.start();
-        } catch (error) {
-          estado.textContent = "El micrófono ya está iniciando. Espera un momento y vuelve a intentarlo.";
-        }
-      });
+  function hablarRespuesta(texto) {
+    if (!('speechSynthesis' in window)) {
+      mostrarEstado('MARÍA respondió por escrito. Este navegador no tiene lectura de voz disponible.');
+      return;
     }
-  </script>
+    window.speechSynthesis.cancel();
+    const voz = new SpeechSynthesisUtterance(texto);
+    voz.lang = 'es-CO';
+    voz.rate = 0.96;
+    const voces = window.speechSynthesis.getVoices();
+    voz.voice = voces.find(v => /^es-CO/i.test(v.lang)) || voces.find(v => /^es/i.test(v.lang)) || null;
+    voz.onstart = () => mostrarEstado('MARÍA está respondiendo...');
+    voz.onend = () => mostrarEstado('MARÍA está lista para escucharte.');
+    window.speechSynthesis.speak(voz);
+  }
 
+  async function enviarAMaria(texto) {
+    texto = String(texto || '').trim();
+    if (!texto || !tokenMaria) return;
+    agregarBurbuja(texto, 'usuario');
+    mostrarEstado('MARÍA está pensando...');
+    activarControles(false);
+    try {
+      const r = await jsonp({api:'chat', token:tokenMaria, message:texto, previousResponseId});
+      if (!r || !r.ok) throw new Error((r && r.mensaje) || 'No se pudo obtener respuesta de MARÍA.');
+      previousResponseId = r.responseId || previousResponseId;
+      agregarBurbuja(r.texto, 'maria');
+      hablarRespuesta(r.texto);
+    } catch (e) {
+      mostrarEstado(e.message || 'Ocurrió un error al comunicarse con MARÍA.');
+    } finally {
+      activarControles(!!tokenMaria);
+    }
+  }
+
+  async function iniciarMaria() {
+    try {
+      const r = await jsonp({api:'auth'});
+      if (!r || !r.ok || !r.token) throw new Error((r && r.mensaje) || 'No se pudo iniciar MARÍA.');
+      tokenMaria = r.token;
+      document.getElementById('usuario').textContent = 'Sesión temporal de prueba';
+      activarControles(true);
+      mostrarEstado('Conexión lista. Puedes hablar o escribirle a MARÍA.');
+    } catch (e) {
+      mostrarEstado(e.message || 'No se pudo conectar con el servidor de JAVELA.');
+    }
+  }
+
+  hablar.addEventListener('click', () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      mostrarEstado('Este navegador no tiene reconocimiento de voz. Usa Chrome actualizado o escribe tu mensaje.');
+      return;
+    }
+    if (reconocimientoActivo) { reconocimientoActivo.stop(); return; }
+    const rec = new SpeechRecognition();
+    reconocimientoActivo = rec;
+    rec.lang = 'es-CO';
+    rec.continuous = false;
+    rec.interimResults = false;
+    hablar.disabled = true;
+    mostrarEstado('MARÍA te está escuchando...');
+    rec.onresult = evento => {
+      const texto = evento.results[0][0].transcript;
+      reconocimientoActivo = null;
+      enviarAMaria(texto);
+    };
+    rec.onerror = evento => {
+      reconocimientoActivo = null;
+      activarControles(!!tokenMaria);
+      const errores = {
+        'not-allowed':'Permite el acceso al micrófono en Chrome.',
+        'no-speech':'No detecté voz. Inténtalo nuevamente.',
+        'audio-capture':'No se encontró un micrófono.',
+        'network':'El reconocimiento de voz perdió la conexión.'
+      };
+      mostrarEstado(errores[evento.error] || ('Error de micrófono: ' + evento.error));
+    };
+    rec.onend = () => {
+      reconocimientoActivo = null;
+      activarControles(!!tokenMaria);
+    };
+    try { rec.start(); }
+    catch (e) {
+      reconocimientoActivo = null;
+      activarControles(!!tokenMaria);
+      mostrarEstado('No se pudo iniciar el micrófono: ' + e.message);
+    }
+  });
+
+  formulario.addEventListener('submit', e => {
+    e.preventDefault();
+    const texto = mensaje.value.trim();
+    if (!texto) return;
+    mensaje.value = '';
+    enviarAMaria(texto);
+  });
+
+  cerrar.addEventListener('click', async () => {
+    if (reconocimientoActivo) reconocimientoActivo.stop();
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    try { if (tokenMaria) await jsonp({api:'logout', token:tokenMaria}); } catch (e) {}
+    tokenMaria = '';
+    activarControles(false);
+    mostrarEstado('Conversación finalizada. Puedes volver a entrar cuando quieras.');
+  });
+
+  iniciarMaria();
+</script>
 </body>
 </html>
