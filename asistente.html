@@ -1,0 +1,261 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MARÍA - JAVELA CATÁLOGOS</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: white;
+      background:
+        linear-gradient(rgba(0, 13, 42, 0.12), rgba(0, 13, 42, 0.12)),
+        url("fondo-javela.png") center center / cover fixed;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    .pantalla {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 35px 20px;
+    }
+
+    .mensaje {
+      color: #ffd878;
+      font-family: Georgia, serif;
+      font-size: clamp(25px, 3.2vw, 36px);
+      font-weight: bold;
+      margin-bottom: 30px;
+      text-shadow: 0 0 15px rgba(255, 190, 50, 0.25);
+    }
+
+    .avatar {
+      width: 260px;
+      max-width: 55vw;
+      height: auto;
+      object-fit: contain;
+      margin-bottom: 28px;
+      filter: drop-shadow(0 0 20px rgba(0, 120, 255, 0.35));
+    }
+
+    .boton-microfono {
+      min-width: 390px;
+      padding: 17px 30px;
+      border: 2px solid #d9ad48;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #063b83, #001b49);
+      color: #ffffff;
+      font-size: 19px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      box-shadow:
+        0 0 15px rgba(0, 115, 255, 0.45),
+        inset 0 0 12px rgba(255, 215, 120, 0.08);
+      transition: 0.25s ease;
+    }
+
+    .boton-microfono:hover {
+      transform: scale(1.04);
+      box-shadow:
+        0 0 25px rgba(0, 145, 255, 0.65),
+        0 0 12px rgba(255, 195, 70, 0.3);
+    }
+
+    .icono-circular {
+      width: 42px;
+      height: 42px;
+      min-width: 42px;
+      border: 2px solid #d9ad48;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0753a5, #001638);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px rgba(0, 140, 255, 0.5);
+    }
+
+    .icono-circular svg {
+      width: 21px;
+      height: 21px;
+      fill: none;
+      stroke: white;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .estado {
+      margin-top: 22px;
+      font-size: 15px;
+      color: #d9eaff;
+      text-shadow: 0 0 8px #006eff;
+      max-width: 760px;
+      line-height: 1.5;
+    }
+
+    .transcripcion {
+      width: min(90%, 650px);
+      min-height: 48px;
+      margin-top: 14px;
+      padding: 12px 16px;
+      border: 1px solid rgba(217, 173, 72, .65);
+      border-radius: 12px;
+      background: rgba(0, 18, 48, .72);
+      color: #fff;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 600px) {
+      .pantalla {
+        padding: 25px 15px;
+      }
+
+      .mensaje {
+        font-size: 25px;
+      }
+
+      .avatar {
+        width: 260px;
+      }
+
+      .boton-microfono {
+        min-width: 0;
+        width: 95%;
+        max-width: 390px;
+        font-size: 15px;
+        padding: 13px 15px;
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="pantalla">
+
+    <h1 class="mensaje">
+      ¿En qué puedo servirte o apoyarte hoy?
+    </h1>
+
+    <img
+      src="maria.png"
+      alt="MARÍA - Asistente de JAVELA CATÁLOGOS"
+      class="avatar"
+    >
+
+    <button class="boton-microfono" id="hablar">
+
+      <span class="icono-circular">
+        <svg viewBox="0 0 24 24">
+          <rect x="9" y="2" width="6" height="12" rx="3"></rect>
+          <path d="M5 10a7 7 0 0 0 14 0"></path>
+          <path d="M12 17v5"></path>
+          <path d="M8 22h8"></path>
+        </svg>
+      </span>
+
+      HABLAR CON MARÍA
+
+    </button>
+
+    <p class="estado" id="estado" aria-live="polite">
+      MARÍA está lista para escucharte. Pulsa el botón para comenzar.
+    </p>
+    <div class="transcripcion" id="transcripcion" aria-live="polite">
+      Aquí aparecerá lo que digas.
+    </div>
+
+  </main>
+
+  <script>
+    const boton = document.getElementById("hablar");
+    const estado = document.getElementById("estado");
+    const transcripcion = document.getElementById("transcripcion");
+    const Reconocimiento = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let reconocimiento = null;
+    let escuchando = false;
+
+    if (!Reconocimiento) {
+      boton.disabled = true;
+      boton.style.opacity = "0.6";
+      estado.textContent = "Este navegador no ofrece reconocimiento de voz. Abre JAVELA CATÁLOGOS en Google Chrome actualizado.";
+    } else {
+      reconocimiento = new Reconocimiento();
+      reconocimiento.lang = "es-CO";
+      reconocimiento.continuous = false;
+      reconocimiento.interimResults = true;
+
+      reconocimiento.onstart = () => {
+        escuchando = true;
+        boton.textContent = "🔴 ESCUCHANDO... (PULSA PARA DETENER)";
+        estado.textContent = "MARÍA te está escuchando. Habla ahora.";
+      };
+
+      reconocimiento.onresult = (evento) => {
+        let texto = "";
+        for (let i = evento.resultIndex; i < evento.results.length; i++) {
+          texto += evento.results[i][0].transcript;
+        }
+        transcripcion.textContent = texto || "Te estoy escuchando...";
+      };
+
+      reconocimiento.onerror = (evento) => {
+        const mensajes = {
+          "not-allowed": "No hay permiso para usar el micrófono. Autorízalo en el navegador.",
+          "audio-capture": "No se detectó un micrófono conectado o disponible.",
+          "no-speech": "No detecté voz. Pulsa el botón e inténtalo de nuevo.",
+          "network": "El reconocimiento de voz necesita conexión a internet. Revisa tu conexión."
+        };
+        estado.textContent = mensajes[evento.error] || "No se pudo reconocer la voz. Inténtalo de nuevo.";
+      };
+
+      reconocimiento.onend = () => {
+        escuchando = false;
+        boton.innerHTML = '<span class="icono-circular"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"></rect><path d="M5 10a7 7 0 0 0 14 0"></path><path d="M12 17v5"></path><path d="M8 22h8"></path></svg></span> HABLAR CON MARÍA';
+        if (transcripcion.textContent !== "Aquí aparecerá lo que digas.") {
+          estado.textContent = "Listo. MARÍA recibió tu voz y mostró el texto.";
+        }
+      };
+
+      boton.addEventListener("click", () => {
+        if (escuchando) {
+          reconocimiento.stop();
+          estado.textContent = "Deteniendo el micrófono...";
+          return;
+        }
+        transcripcion.textContent = "Aquí aparecerá lo que digas.";
+        try {
+          reconocimiento.start();
+        } catch (error) {
+          estado.textContent = "El micrófono ya está iniciando. Espera un momento y vuelve a intentarlo.";
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>

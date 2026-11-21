@@ -1,226 +1,529 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MARÍA | JAVELA CATÁLOGOS</title>
-  <style>
-    :root{--azul:#173b68;--azul2:#0b2850;--dorado:#d9ad48;--crema:#f5f3ed;--blanco:#fff}
-    *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;background:linear-gradient(145deg,#0a2348,#173b68 58%,#294e78);font-family:Arial,sans-serif;color:var(--blanco);display:flex;align-items:center;justify-content:center;padding:22px}
-    .panel{width:min(100%,620px);background:rgba(255,255,255,.97);color:var(--azul);border:1px solid rgba(217,173,72,.75);border-radius:22px;padding:26px;box-shadow:0 18px 55px #00142e66}
-    .marca{font-size:13px;letter-spacing:3px;color:#a77d22;font-weight:bold;text-align:center}
-    h1{text-align:center;margin:9px 0 5px;font-family:Georgia,serif;font-size:34px;color:var(--azul)}
-    .sub{text-align:center;color:#52677f;margin:0 0 22px}
-    .estado{background:#f0f3f7;border-radius:12px;padding:13px 15px;min-height:48px;color:#284967;text-align:center;line-height:1.45;margin:16px 0}
-    .conversacion{height:260px;overflow:auto;background:#f7f8fa;border:1px solid #e0e6ed;border-radius:14px;padding:13px;display:flex;flex-direction:column;gap:10px}
-    .burbuja{max-width:88%;padding:11px 13px;border-radius:14px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
-    .usuario{align-self:flex-end;background:#dce9f8;color:#173b68;border-bottom-right-radius:4px}
-    .maria{align-self:flex-start;background:#173b68;color:white;border-bottom-left-radius:4px}
-    .controles{display:flex;gap:10px;margin-top:16px}
-    button{border:0;border-radius:11px;padding:14px 16px;font-size:15px;font-weight:bold;cursor:pointer}
-    button:disabled{opacity:.55;cursor:not-allowed}
-    #hablar{flex:1;background:linear-gradient(135deg,#174c86,#09284f);color:white;border:1px solid var(--dorado);box-shadow:0 5px 15px #173b6825}
-    #enviar{background:#d9ad48;color:#172f4c}
-    .entrada{display:flex;gap:9px;margin-top:10px}
-    input{flex:1;min-width:0;border:1px solid #cbd5df;border-radius:10px;padding:12px;font-size:15px}
-    .pie{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:17px;font-size:12px;color:#62758a}
-    .pie button{padding:8px 10px;background:transparent;color:#52677f;border:1px solid #cbd5df;font-size:12px}
-    a{color:inherit}
-    @media(max-width:520px){.panel{padding:19px}.conversacion{height:240px}.controles{flex-direction:column}h1{font-size:29px}.pie{align-items:flex-start}}
-  </style>
-</head>
-<body>
-  <main class="panel">
-    <div class="marca">JAVELA CATÁLOGOS</div>
-    <h1>MARÍA</h1>
-    <p class="sub">Tu asistente está lista para escucharte</p>
-    <div id="estado" class="estado" role="status">Conectando con tu sesión...</div>
-    <section id="conversacion" class="conversacion" aria-live="polite">
-      <div class="burbuja maria">Hola, soy MARÍA. Cuando esté conectada, puedes hablarme o escribirme.</div>
-    </section>
-    <div class="controles">
-      <button id="hablar" disabled>🎙 HABLAR CON MARÍA</button>
-    </div>
-    <form id="formulario" class="entrada">
-      <input id="mensaje" type="text" maxlength="1500" placeholder="También puedes escribir aquí..." autocomplete="off" disabled>
-      <button id="enviar" type="submit" disabled>Enviar</button>
-    </form>
-    <div class="pie">
-      <span id="usuario">Sesión protegida de JAVELA</span>
-      <button id="cerrar" type="button">Cerrar sesión</button>
-    </div>
-  </main>
-<script>
-  const API_URL = 'https://script.google.com/macros/s/AKfycbwiljbo-WU0WmXa_i0IwbzGrc1G4DOTWfP8cNe0iDRvOCP8P47yc8lS7-N-nIOZRl6C2g/exec';
-  const APP_URL = 'https://script.google.com/macros/s/AKfycbwiljbo-WU0WmXa_i0IwbzGrc1G4DOTWfP8cNe0iDRvOCP8P47yc8lS7-N-nIOZRl6C2g/exec';
-  const estado = document.getElementById('estado');
-  const hablar = document.getElementById('hablar');
-  const enviar = document.getElementById('enviar');
-  const mensaje = document.getElementById('mensaje');
-  const conversacion = document.getElementById('conversacion');
-  const formulario = document.getElementById('formulario');
-  const cerrar = document.getElementById('cerrar');
-  let tokenMaria = '';
-  let previousResponseId = '';
-  let contadorJsonp = 0;
-  let reconocimientoActivo = null;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JAVELA CATÁLOGOS</title>
 
-  function jsonp(parametros) {
-    return new Promise((resolve, reject) => {
-      const callback = 'mariaCallback_' + Date.now() + '_' + (++contadorJsonp);
-      const script = document.createElement('script');
-      const datos = new URLSearchParams({...parametros, callback});
-      let terminado = false;
-      const limpiar = () => {
-        if (terminado) return;
-        terminado = true;
-        clearTimeout(temporizador);
-        delete window[callback];
-        script.remove();
-      };
-      window[callback] = (respuesta) => { limpiar(); resolve(respuesta); };
-      script.onerror = () => { limpiar(); reject(new Error('No se pudo comunicar con el servidor de JAVELA.')); };
-      const temporizador = setTimeout(() => { limpiar(); reject(new Error('El servidor tardó demasiado en responder. Inténtalo nuevamente.')); }, 45000);
-      script.src = API_URL + '?' + datos.toString();
-      document.head.appendChild(script);
-    });
-  }
-
-  function mostrarEstado(texto) { estado.textContent = texto; }
-  function agregarBurbuja(texto, tipo) {
-    const div = document.createElement('div');
-    div.className = 'burbuja ' + tipo;
-    div.textContent = texto;
-    conversacion.appendChild(div);
-    conversacion.scrollTop = conversacion.scrollHeight;
-  }
-  function activarControles(activo) {
-    hablar.disabled = !activo;
-    mensaje.disabled = !activo;
-    enviar.disabled = !activo;
-  }
-  function hablarRespuesta(texto) {
-    if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const voz = new SpeechSynthesisUtterance(texto);
-    voz.lang = 'es-CO';
-    voz.rate = 0.96;
-    const voces = window.speechSynthesis.getVoices();
-    voz.voice = voces.find(v => /^es-CO/i.test(v.lang)) || voces.find(v => /^es/i.test(v.lang)) || null;
-    window.speechSynthesis.speak(voz);
-  }
-
-  async function enviarAMaria(texto) {
-    texto = String(texto || '').trim();
-    if (!texto || !tokenMaria) return;
-    agregarBurbuja(texto, 'usuario');
-    mostrarEstado('MARÍA está pensando...');
-    activarControles(false);
-    try {
-      const r = await jsonp({api:'chat', token:tokenMaria, message:texto, previousResponseId});
-      if (!r || !r.ok) {
-        if (r && r.codigo === 'SESION') {
-          tokenMaria = '';
-          mostrarEstado(r.mensaje || 'La sesión venció. Vuelve a iniciar sesión.');
-          return;
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        throw new Error((r && r.mensaje) || 'No se pudo obtener respuesta de MARÍA.');
-      }
-      previousResponseId = r.responseId || previousResponseId;
-      agregarBurbuja(r.texto, 'maria');
-      mostrarEstado('MARÍA está lista para escucharte.');
-      hablarRespuesta(r.texto);
-    } catch (e) {
-      mostrarEstado(e.message || 'Ocurrió un error al comunicarse con MARÍA.');
-    } finally {
-      activarControles(!!tokenMaria);
-    }
-  }
 
-  async function iniciarSesionMicrofono() {
-    const handoff = new URLSearchParams(location.search).get('handoff');
-    if (!handoff) {
-      mostrarEstado('Para entrar, inicia sesión en JAVELA CATÁLOGOS y abre MARÍA desde allí.');
-      return;
-    }
-    try {
-      const r = await jsonp({api:'auth', handoff});
-      if (!r || !r.ok || !r.token) throw new Error((r && r.mensaje) || 'No se pudo validar el acceso.');
-      tokenMaria = r.token;
-      document.getElementById('usuario').textContent = r.nombre ? 'Conectada: ' + r.nombre : 'Sesión protegida de JAVELA';
-      history.replaceState({}, document.title, location.pathname);
-      activarControles(true);
-      mostrarEstado('Conexión lista. Puedes hablar con MARÍA.');
-    } catch (e) {
-      mostrarEstado(e.message || 'No se pudo abrir la sesión. Vuelve a iniciar sesión en JAVELA CATÁLOGOS.');
-      const enlace = document.createElement('a');
-      enlace.href = APP_URL;
-      enlace.textContent = ' Volver al acceso de JAVELA';
-      estado.appendChild(enlace);
-    }
-  }
+        body {
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            color: white;
+            background-color: #03142f;
+            background-image:
+                linear-gradient(
+                    rgba(0, 12, 35, 0.12),
+                    rgba(0, 12, 35, 0.18)
+                ),
+                url("fondo-javela.png");
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            overflow-x: hidden;
+        }
 
-  hablar.addEventListener('click', () => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      mostrarEstado('Este navegador no tiene reconocimiento de voz. Usa Google Chrome actualizado o escribe tu mensaje.');
-      return;
-    }
-    if (reconocimientoActivo) { reconocimientoActivo.stop(); return; }
-    const rec = new SpeechRecognition();
-    reconocimientoActivo = rec;
-    rec.lang = 'es-CO';
-    rec.continuous = false;
-    rec.interimResults = false;
-    hablar.disabled = true;
-    mostrarEstado('MARÍA te está escuchando...');
-    rec.onresult = (evento) => {
-      const texto = evento.results[0][0].transcript;
-      reconocimientoActivo = null;
-      enviarAMaria(texto);
-    };
-    rec.onerror = (evento) => {
-      reconocimientoActivo = null;
-      activarControles(!!tokenMaria);
-      const errores = {'not-allowed':'Permite el acceso al micrófono en Chrome.','no-speech':'No detecté voz. Inténtalo nuevamente.','audio-capture':'No se encontró un micrófono.','network':'El reconocimiento de voz perdió la conexión.'};
-      mostrarEstado(errores[evento.error] || ('Error de micrófono: ' + evento.error));
-    };
-    rec.onend = () => {
-      reconocimientoActivo = null;
-      if (tokenMaria && !hablar.disabled) mostrarEstado('MARÍA está lista para escucharte.');
-      activarControles(!!tokenMaria);
-    };
-    try { rec.start(); }
-    catch (e) { reconocimientoActivo = null; activarControles(!!tokenMaria); mostrarEstado('No se pudo iniciar el micrófono: ' + e.message); }
-  });
+        .pantalla {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            padding: 18px 20px 16px;
+        }
 
-  formulario.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const texto = mensaje.value.trim();
-    if (!texto) return;
-    mensaje.value = '';
-    enviarAMaria(texto);
-  });
+        /* ENCABEZADO JAVELA */
 
-  cerrar.addEventListener('click', async () => {
-    cerrar.disabled = true;
-    if (reconocimientoActivo) reconocimientoActivo.stop();
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-    try { if (tokenMaria) await jsonp({api:'logout', token:tokenMaria}); }
-    catch (e) { /* El cierre local continúa aunque falle la red. */ }
-    tokenMaria = '';
-    activarControles(false);
-    mostrarEstado('Sesión cerrada. Regresa a JAVELA CATÁLOGOS para ingresar nuevamente.');
-    cerrar.disabled = false;
-    const enlace = document.createElement('a');
-    enlace.href = APP_URL;
-    enlace.textContent = ' Volver al acceso';
-    estado.appendChild(enlace);
-  });
+        .encabezado {
+            width: 100%;
+            padding: 2px 10px 10px;
+        }
 
-  iniciarSesionMicrofono();
-</script>
+        .logo-titulo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+        }
+
+        .icono-tienda {
+            width: 75px;
+            height: 43px;
+            filter: drop-shadow(0 0 7px rgba(255, 190, 45, 0.65));
+            margin-bottom: -2px;
+        }
+
+        .titulo {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(38px, 5vw, 65px);
+            font-weight: bold;
+            letter-spacing: 5px;
+            line-height: 1.05;
+            color: #ffd76c;
+            background: linear-gradient(
+                180deg,
+                #fff4b9 0%,
+                #ffd65e 28%,
+                #d99520 58%,
+                #fff0a0 78%,
+                #c78317 100%
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 3px 2px #392000)
+                    drop-shadow(0 0 9px rgba(255, 185, 35, 0.35));
+        }
+
+        .subtitulo-logo {
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 8px;
+            color: #fff0bd;
+            margin-top: 5px;
+            text-shadow: 0 2px 5px #000;
+        }
+
+        .linea-dorada {
+            width: 310px;
+            max-width: 75%;
+            height: 2px;
+            margin: 12px auto 0;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                #bd8525,
+                #ffe18a,
+                #bd8525,
+                transparent
+            );
+            box-shadow: 0 0 7px rgba(255, 190, 55, 0.35);
+        }
+
+        /* PRESENTACIÓN */
+
+        .contenido {
+            width: 100%;
+            max-width: 850px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-top: 8px;
+        }
+
+        .bienvenida h2 {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(29px, 3.2vw, 42px);
+            color: #ffdc83;
+            margin-bottom: 13px;
+            text-shadow:
+                0 2px 5px #00102c,
+                0 0 12px rgba(255, 197, 70, 0.2);
+        }
+
+        .bienvenida p {
+            max-width: 760px;
+            font-size: clamp(15px, 1.5vw, 20px);
+            line-height: 1.6;
+            color: #ffffff;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 5px #00102c;
+        }
+
+        /* AVATAR MARÍA */
+
+        .avatar {
+            width: min(390px, 75vw);
+            height: auto;
+            max-height: 470px;
+            object-fit: contain;
+            display: block;
+            margin: 5px auto 12px;
+            filter:
+                drop-shadow(0 0 9px rgba(35, 135, 255, 0.25))
+                drop-shadow(0 0 22px rgba(20, 105, 230, 0.18));
+        }
+
+        /* BOTÓN INICIAR SESIÓN */
+
+        .boton {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 17px;
+            min-width: 390px;
+            padding: 13px 30px;
+            border: 3px solid #e9b844;
+            border-radius: 60px;
+            background: linear-gradient(
+                180deg,
+                #174c91 0%,
+                #082958 45%,
+                #031735 100%
+            );
+            color: #ffffff;
+            font-size: 21px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            box-shadow:
+                0 0 5px #fff0a6,
+                0 0 13px rgba(255, 190, 50, 0.8),
+                inset 0 2px 7px rgba(255, 255, 255, 0.25),
+                inset 0 -5px 10px rgba(0, 0, 0, 0.35);
+            text-shadow: 0 2px 4px #00102c;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .boton:hover {
+            transform: translateY(-3px);
+            box-shadow:
+                0 0 8px #fff0a6,
+                0 0 20px rgba(255, 190, 50, 0.9),
+                inset 0 2px 7px rgba(255, 255, 255, 0.3);
+        }
+
+        .icono-usuario {
+            width: 43px;
+            height: 43px;
+            min-width: 43px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #25aaff;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #1478ca, #062a64);
+            box-shadow:
+                0 0 8px #159dff,
+                inset 0 0 7px rgba(255, 255, 255, 0.25);
+        }
+
+        .icono-usuario svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .separador-boton {
+            width: 2px;
+            height: 34px;
+            background: linear-gradient(
+                180deg,
+                transparent,
+                #ffdc72,
+                transparent
+            );
+        }
+
+        .flechas {
+            color: #ffc52d;
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: -8px;
+            padding-right: 7px;
+            text-shadow: 0 0 8px rgba(255, 190, 30, 0.7);
+        }
+
+        /* PIE DE PANTALLA */
+
+        footer {
+            width: 100%;
+            padding: 12px 10px 5px;
+            color: #f4d27b;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 5px #00102a;
+        }
+
+
+        /* MENU DE CUENTA */
+        .menu-cuenta { position: absolute; top: 18px; right: 25px; z-index: 20; }
+        .boton-cuenta { border: 1px solid #e9b844; border-radius: 28px; padding: 11px 17px; color: #ffdc83; background: rgba(3, 23, 53, .88); font-weight: bold; cursor: pointer; box-shadow: 0 0 12px rgba(255,190,50,.18); }
+        .opciones-cuenta { display: none; position: absolute; right: 0; top: 48px; min-width: 190px; padding: 7px; border: 1px solid #d9ad48; border-radius: 12px; background: #061d40; box-shadow: 0 8px 24px rgba(0,0,0,.45); }
+        .opciones-cuenta.visible { display: block; }
+        .opciones-cuenta button { width: 100%; padding: 12px; border: 0; border-radius: 8px; color: white; background: transparent; text-align: left; cursor: pointer; }
+        .opciones-cuenta button:hover { background: #123d75; }
+        .opciones-cuenta button:disabled { opacity: .4; cursor: not-allowed; }
+        .modal-acceso { display: none; position: fixed; inset: 0; z-index: 50; align-items: center; justify-content: center; padding: 20px; background: rgba(0, 8, 25, .78); }
+        .modal-acceso.visible { display: flex; }
+        .formulario-acceso { width: min(100%, 420px); padding: 30px; border: 1px solid #d9ad48; border-radius: 18px; background: linear-gradient(160deg, #0b3267, #03142f); box-shadow: 0 0 25px rgba(0,120,255,.3); text-align: left; }
+        .formulario-acceso h2 { margin-bottom: 8px; color: #ffdc83; text-align: center; font-family: Georgia, serif; }
+        .formulario-acceso p { margin-bottom: 22px; color: #dbe8ff; text-align: center; font-size: 14px; }
+        .formulario-acceso label { display: block; margin: 14px 0 6px; color: #ffdc83; font-size: 14px; }
+        .formulario-acceso input { width: 100%; padding: 12px; border: 1px solid #b88b32; border-radius: 8px; color: #fff; background: #041a38; font-size: 15px; }
+        .acciones-acceso { display: flex; gap: 10px; margin-top: 22px; }
+        .acciones-acceso button { flex: 1; padding: 12px; border: 1px solid #d9ad48; border-radius: 9px; font-weight: bold; cursor: pointer; }
+        .entrar-acceso { color: white; background: #0c4a91; }
+        .cancelar-acceso { color: #ffdc83; background: transparent; }
+        .nota-acceso { margin-top: 14px; color: #b9c9e2; font-size: 11px; text-align: center; line-height: 1.4; }
+
+        /* ADAPTACIÓN A CELULARES */
+
+        @media (max-width: 600px) {
+            .menu-cuenta { top: 12px; right: 12px; }
+            .boton-cuenta { padding: 9px 12px; font-size: 12px; }
+            .formulario-acceso { padding: 23px; }
+
+            .pantalla {
+                padding: 18px 12px 12px;
+            }
+
+            .icono-tienda {
+                width: 60px;
+                height: 35px;
+            }
+
+            .titulo {
+                font-size: clamp(29px, 8vw, 39px);
+                letter-spacing: 2px;
+            }
+
+            .subtitulo-logo {
+                font-size: 11px;
+                letter-spacing: 5px;
+            }
+
+            .linea-dorada {
+                width: 210px;
+            }
+
+            .bienvenida h2 {
+                font-size: 28px;
+            }
+
+            .bienvenida p {
+                font-size: 15px;
+                line-height: 1.5;
+            }
+
+            .avatar {
+                width: min(330px, 82vw);
+                max-height: 390px;
+                margin: 8px auto;
+            }
+
+            .boton {
+                min-width: 0;
+                width: min(100%, 340px);
+                gap: 10px;
+                padding: 11px 15px;
+                font-size: 16px;
+            }
+
+            .icono-usuario {
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+            }
+
+            .separador-boton {
+                height: 28px;
+            }
+
+            .flechas {
+                font-size: 26px;
+            }
+
+            footer {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="pantalla">
+
+        <div class="menu-cuenta">
+            <button class="boton-cuenta" id="botonCuenta" type="button" aria-expanded="false">♟ &nbsp; CUENTA &nbsp; ▾</button>
+            <div class="opciones-cuenta" id="opcionesCuenta">
+                <button type="button" id="opcionIniciar">↪ &nbsp; Iniciar sesión</button>
+                <button type="button" id="opcionCerrar" disabled>↩ &nbsp; Cerrar sesión</button>
+            </div>
+        </div>
+
+        <header class="encabezado">
+
+            <div class="logo-titulo">
+
+                <svg class="icono-tienda"
+                     viewBox="0 0 100 60"
+                     xmlns="http://www.w3.org/2000/svg"
+                     aria-hidden="true">
+
+                    <path d="M15 25 L23 7 H77 L85 25"
+                          fill="none"
+                          stroke="#ffcf50"
+                          stroke-width="4"
+                          stroke-linejoin="round"/>
+
+                    <path d="M12 25 H88 V34
+                             Q80 43 72 34
+                             Q64 43 56 34
+                             Q48 43 40 34
+                             Q32 43 24 34
+                             Q16 43 12 34 Z"
+                          fill="#e9ad35"
+                          stroke="#fff0a5"
+                          stroke-width="2"/>
+
+                    <path d="M25 25 V34
+                             Q25 41 33 41
+                             Q41 41 41 34 V25"
+                          fill="#0b3670"
+                          stroke="#ffd76b"
+                          stroke-width="2"/>
+
+                    <path d="M41 25 V34
+                             Q41 41 49 41
+                             Q57 41 57 34 V25"
+                          fill="#e9ad35"
+                          stroke="#fff0a5"
+                          stroke-width="2"/>
+
+                    <path d="M57 25 V34
+                             Q57 41 65 41
+                             Q73 41 73 34 V25"
+                          fill="#0b3670"
+                          stroke="#ffd76b"
+                          stroke-width="2"/>
+
+                    <path d="M25 43 V55 H75 V43"
+                          fill="#0b3670"
+                          stroke="#e9ad35"
+                          stroke-width="3"/>
+
+                    <path d="M43 55 V45 H57 V55"
+                          fill="#e9ad35"
+                          stroke="#fff0a5"
+                          stroke-width="2"/>
+
+                </svg>
+
+                <h1 class="titulo">JAVELA</h1>
+                <div class="subtitulo-logo">CATÁLOGOS</div>
+
+            </div>
+
+            <div class="linea-dorada"></div>
+
+        </header>
+
+        <main class="contenido">
+
+            <section class="bienvenida">
+
+                <h2>¡Hola! Soy MARÍA</h2>
+
+                <p>
+                    Bienvenida a JAVELA CATÁLOGOS.
+                    Estoy aquí para acompañarte y ayudarte
+                    a gestionar y hacer crecer tus ventas.
+                </p>
+
+            </section>
+
+            <img
+                src="maria.png"
+                alt="María, asistente virtual de JAVELA CATÁLOGOS"
+                class="avatar"
+            >
+
+            <button class="boton" id="botonPrincipal" type="button">
+
+                <span class="icono-usuario">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 12a4.5 4.5 0 1 0 0-9
+                                 4.5 4.5 0 0 0 0 9Zm0 2
+                                 c-4.2 0-7.5 2.2-7.5 5v2h15v-2
+                                 c0-2.8-3.3-5-7.5-5Z"/>
+                    </svg>
+                </span>
+
+                <span class="separador-boton"></span>
+
+                <span>INICIAR SESIÓN</span>
+
+                <span class="flechas">»</span>
+
+            </button>
+
+        </main>
+
+        <footer>
+            JAVELA · Soluciones comerciales inteligentes
+        </footer>
+
+    </div>
+
+
+    <div class="modal-acceso" id="modalAcceso" role="dialog" aria-modal="true" aria-labelledby="tituloAcceso">
+        <form class="formulario-acceso" id="formularioAcceso">
+            <h2 id="tituloAcceso">Bienvenida de nuevo</h2>
+            <p>Ingresa tus datos para continuar</p>
+            <label for="correoAcceso">Correo electrónico</label>
+            <input id="correoAcceso" type="email" placeholder="tu correo electrónico" autocomplete="username" required>
+            <label for="claveAcceso">Contraseña</label>
+            <input id="claveAcceso" type="password" placeholder="Tu contraseña" autocomplete="current-password" required>
+            <div class="acciones-acceso">
+                <button class="entrar-acceso" type="submit">INICIAR SESIÓN</button>
+                <button class="cancelar-acceso" id="cancelarAcceso" type="button">CANCELAR</button>
+            </div>
+            <div class="nota-acceso">Formulario visual de prueba. La validación segura de usuarios se conectará en la siguiente etapa.</div>
+        </form>
+    </div>
+
+    <script>
+        const botonCuenta = document.getElementById('botonCuenta');
+        const opcionesCuenta = document.getElementById('opcionesCuenta');
+        const modalAcceso = document.getElementById('modalAcceso');
+        const opcionCerrar = document.getElementById('opcionCerrar');
+        let sesionDemostracion = false;
+
+        function abrirAcceso() {
+            opcionesCuenta.classList.remove('visible');
+            botonCuenta.setAttribute('aria-expanded', 'false');
+            modalAcceso.classList.add('visible');
+            document.getElementById('correoAcceso').focus();
+        }
+        function actualizarMenu() {
+            opcionCerrar.disabled = !sesionDemostracion;
+            botonCuenta.innerHTML = sesionDemostracion ? '♟ &nbsp; MI CUENTA &nbsp; ▾' : '♟ &nbsp; CUENTA &nbsp; ▾';
+        }
+
+        botonCuenta.addEventListener('click', () => {
+            const abierto = opcionesCuenta.classList.toggle('visible');
+            botonCuenta.setAttribute('aria-expanded', String(abierto));
+        });
+        document.getElementById('opcionIniciar').addEventListener('click', abrirAcceso);
+        document.getElementById('botonPrincipal').addEventListener('click', abrirAcceso);
+        document.getElementById('cancelarAcceso').addEventListener('click', () => modalAcceso.classList.remove('visible'));
+        modalAcceso.addEventListener('click', (evento) => {
+            if (evento.target === modalAcceso) modalAcceso.classList.remove('visible');
+        });
+        document.getElementById('formularioAcceso').addEventListener('submit', (evento) => {
+            evento.preventDefault();
+            alert('La pantalla de acceso está lista. En el siguiente paso conectaremos la validación real del correo y la contraseña.');
+        });
+        opcionCerrar.addEventListener('click', () => {
+            if (!sesionDemostracion) return;
+            sesionDemostracion = false;
+            actualizarMenu();
+            opcionesCuenta.classList.remove('visible');
+            alert('La sesión de demostración se ha cerrado.');
+        });
+        actualizarMenu();
+    </script>
 </body>
 </html>
