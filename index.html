@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JAVELA - Prueba de micrófono</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f3ed;
+      text-align: center;
+      padding: 35px 15px;
+      color: #173b68;
+    }
+    .panel {
+      background: white;
+      max-width: 480px;
+      margin: auto;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 3px 15px #0001;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      margin: 15px 0;
+      border: 0;
+      border-radius: 9px;
+      background: #173b68;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #resultado {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f1f1f1;
+      border-radius: 8px;
+      overflow-wrap: anywhere;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>JAVELA CATÁLOGOS</h1>
+    <h3>Diagnóstico de micrófono</h3>
+
+    <button onclick="probarMicrofono()">
+      PROBAR ACCESO AL MICRÓFONO
+    </button>
+
+    <button onclick="probarVoz()">
+      PROBAR RECONOCIMIENTO DE VOZ
+    </button>
+
+    <div id="resultado">Esperando prueba...</div>
+  </div>
+
+  <script>
+    const resultado = document.getElementById("resultado");
+
+    async function probarMicrofono() {
+      resultado.textContent = "Solicitando permiso...";
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true
+        });
+
+        stream.getTracks().forEach(track => track.stop());
+
+        resultado.textContent =
+          "EXITO: El navegador permitió acceder al micrófono.";
+
+      } catch (error) {
+        resultado.textContent =
+          "ERROR: " + error.name + " - " + error.message;
+      }
+    }
+
+    function probarVoz() {
+      const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+      if (!SpeechRecognition) {
+        resultado.textContent =
+          "Este navegador no soporta reconocimiento de voz.";
+        return;
+      }
+
+      const reconocimiento = new SpeechRecognition();
+
+      reconocimiento.lang = "es-CO";
+      reconocimiento.continuous = false;
+      reconocimiento.interimResults = false;
+
+      reconocimiento.onstart = () => {
+        resultado.textContent = "Escuchando... habla ahora.";
+      };
+
+      reconocimiento.onresult = (event) => {
+        resultado.textContent =
+          "VOZ RECONOCIDA: " +
+          event.results[0][0].transcript;
+      };
+
+      reconocimiento.onerror = (event) => {
+        resultado.textContent =
+          "ERROR DE VOZ: " + event.error;
+      };
+
+      reconocimiento.onend = () => {
+        console.log("Reconocimiento finalizado");
+      };
+
+      reconocimiento.start();
+    }
+  </script>
+</body>
+</html>
