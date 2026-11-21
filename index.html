@@ -4,120 +4,223 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JAVELA - Prueba de micrófono</title>
+  <title>MARÍA | JAVELA CATÁLOGOS</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f3ed;
-      text-align: center;
-      padding: 35px 15px;
-      color: #173b68;
-    }
-    .panel {
-      background: white;
-      max-width: 480px;
-      margin: auto;
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 3px 15px #0001;
-    }
-    button {
-      display: block;
-      width: 100%;
-      padding: 15px;
-      margin: 15px 0;
-      border: 0;
-      border-radius: 9px;
-      background: #173b68;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    #resultado {
-      margin-top: 20px;
-      padding: 15px;
-      background: #f1f1f1;
-      border-radius: 8px;
-      overflow-wrap: anywhere;
-    }
+    :root{--azul:#173b68;--azul2:#0b2850;--dorado:#d9ad48;--crema:#f5f3ed;--blanco:#fff}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:linear-gradient(145deg,#0a2348,#173b68 58%,#294e78);font-family:Arial,sans-serif;color:var(--blanco);display:flex;align-items:center;justify-content:center;padding:22px}
+    .panel{width:min(100%,620px);background:rgba(255,255,255,.97);color:var(--azul);border:1px solid rgba(217,173,72,.75);border-radius:22px;padding:26px;box-shadow:0 18px 55px #00142e66}
+    .marca{font-size:13px;letter-spacing:3px;color:#a77d22;font-weight:bold;text-align:center}
+    h1{text-align:center;margin:9px 0 5px;font-family:Georgia,serif;font-size:34px;color:var(--azul)}
+    .sub{text-align:center;color:#52677f;margin:0 0 22px}
+    .estado{background:#f0f3f7;border-radius:12px;padding:13px 15px;min-height:48px;color:#284967;text-align:center;line-height:1.45;margin:16px 0}
+    .conversacion{height:260px;overflow:auto;background:#f7f8fa;border:1px solid #e0e6ed;border-radius:14px;padding:13px;display:flex;flex-direction:column;gap:10px}
+    .burbuja{max-width:88%;padding:11px 13px;border-radius:14px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+    .usuario{align-self:flex-end;background:#dce9f8;color:#173b68;border-bottom-right-radius:4px}
+    .maria{align-self:flex-start;background:#173b68;color:white;border-bottom-left-radius:4px}
+    .controles{display:flex;gap:10px;margin-top:16px}
+    button{border:0;border-radius:11px;padding:14px 16px;font-size:15px;font-weight:bold;cursor:pointer}
+    button:disabled{opacity:.55;cursor:not-allowed}
+    #hablar{flex:1;background:linear-gradient(135deg,#174c86,#09284f);color:white;border:1px solid var(--dorado);box-shadow:0 5px 15px #173b6825}
+    #enviar{background:#d9ad48;color:#172f4c}
+    .entrada{display:flex;gap:9px;margin-top:10px}
+    input{flex:1;min-width:0;border:1px solid #cbd5df;border-radius:10px;padding:12px;font-size:15px}
+    .pie{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:17px;font-size:12px;color:#62758a}
+    .pie button{padding:8px 10px;background:transparent;color:#52677f;border:1px solid #cbd5df;font-size:12px}
+    a{color:inherit}
+    @media(max-width:520px){.panel{padding:19px}.conversacion{height:240px}.controles{flex-direction:column}h1{font-size:29px}.pie{align-items:flex-start}}
   </style>
 </head>
 <body>
-  <div class="panel">
-    <h1>JAVELA CATÁLOGOS</h1>
-    <h3>Diagnóstico de micrófono</h3>
+  <main class="panel">
+    <div class="marca">JAVELA CATÁLOGOS</div>
+    <h1>MARÍA</h1>
+    <p class="sub">Tu asistente está lista para escucharte</p>
+    <div id="estado" class="estado" role="status">Conectando con tu sesión...</div>
+    <section id="conversacion" class="conversacion" aria-live="polite">
+      <div class="burbuja maria">Hola, soy MARÍA. Cuando esté conectada, puedes hablarme o escribirme.</div>
+    </section>
+    <div class="controles">
+      <button id="hablar" disabled>🎙 HABLAR CON MARÍA</button>
+    </div>
+    <form id="formulario" class="entrada">
+      <input id="mensaje" type="text" maxlength="1500" placeholder="También puedes escribir aquí..." autocomplete="off" disabled>
+      <button id="enviar" type="submit" disabled>Enviar</button>
+    </form>
+    <div class="pie">
+      <span id="usuario">Sesión protegida de JAVELA</span>
+      <button id="cerrar" type="button">Cerrar sesión</button>
+    </div>
+  </main>
+<script>
+  const API_URL = 'https://script.google.com/macros/s/AKfycbwiljbo-WU0WmXa_i0IwbzGrc1G4DOTWfP8cNe0iDRvOCP8P47yc8lS7-N-nIOZRl6C2g/exec';
+  const APP_URL = 'https://script.google.com/macros/s/AKfycbwiljbo-WU0WmXa_i0IwbzGrc1G4DOTWfP8cNe0iDRvOCP8P47yc8lS7-N-nIOZRl6C2g/exec';
+  const estado = document.getElementById('estado');
+  const hablar = document.getElementById('hablar');
+  const enviar = document.getElementById('enviar');
+  const mensaje = document.getElementById('mensaje');
+  const conversacion = document.getElementById('conversacion');
+  const formulario = document.getElementById('formulario');
+  const cerrar = document.getElementById('cerrar');
+  let tokenMaria = '';
+  let previousResponseId = '';
+  let contadorJsonp = 0;
+  let reconocimientoActivo = null;
 
-    <button onclick="probarMicrofono()">
-      PROBAR ACCESO AL MICRÓFONO
-    </button>
+  function jsonp(parametros) {
+    return new Promise((resolve, reject) => {
+      const callback = 'mariaCallback_' + Date.now() + '_' + (++contadorJsonp);
+      const script = document.createElement('script');
+      const datos = new URLSearchParams({...parametros, callback});
+      let terminado = false;
+      const limpiar = () => {
+        if (terminado) return;
+        terminado = true;
+        clearTimeout(temporizador);
+        delete window[callback];
+        script.remove();
+      };
+      window[callback] = (respuesta) => { limpiar(); resolve(respuesta); };
+      script.onerror = () => { limpiar(); reject(new Error('No se pudo comunicar con el servidor de JAVELA.')); };
+      const temporizador = setTimeout(() => { limpiar(); reject(new Error('El servidor tardó demasiado en responder. Inténtalo nuevamente.')); }, 45000);
+      script.src = API_URL + '?' + datos.toString();
+      document.head.appendChild(script);
+    });
+  }
 
-    <button onclick="probarVoz()">
-      PROBAR RECONOCIMIENTO DE VOZ
-    </button>
+  function mostrarEstado(texto) { estado.textContent = texto; }
+  function agregarBurbuja(texto, tipo) {
+    const div = document.createElement('div');
+    div.className = 'burbuja ' + tipo;
+    div.textContent = texto;
+    conversacion.appendChild(div);
+    conversacion.scrollTop = conversacion.scrollHeight;
+  }
+  function activarControles(activo) {
+    hablar.disabled = !activo;
+    mensaje.disabled = !activo;
+    enviar.disabled = !activo;
+  }
+  function hablarRespuesta(texto) {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const voz = new SpeechSynthesisUtterance(texto);
+    voz.lang = 'es-CO';
+    voz.rate = 0.96;
+    const voces = window.speechSynthesis.getVoices();
+    voz.voice = voces.find(v => /^es-CO/i.test(v.lang)) || voces.find(v => /^es/i.test(v.lang)) || null;
+    window.speechSynthesis.speak(voz);
+  }
 
-    <div id="resultado">Esperando prueba...</div>
-  </div>
-
-  <script>
-    const resultado = document.getElementById("resultado");
-
-    async function probarMicrofono() {
-      resultado.textContent = "Solicitando permiso...";
-
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true
-        });
-
-        stream.getTracks().forEach(track => track.stop());
-
-        resultado.textContent =
-          "EXITO: El navegador permitió acceder al micrófono.";
-
-      } catch (error) {
-        resultado.textContent =
-          "ERROR: " + error.name + " - " + error.message;
+  async function enviarAMaria(texto) {
+    texto = String(texto || '').trim();
+    if (!texto || !tokenMaria) return;
+    agregarBurbuja(texto, 'usuario');
+    mostrarEstado('MARÍA está pensando...');
+    activarControles(false);
+    try {
+      const r = await jsonp({api:'chat', token:tokenMaria, message:texto, previousResponseId});
+      if (!r || !r.ok) {
+        if (r && r.codigo === 'SESION') {
+          tokenMaria = '';
+          mostrarEstado(r.mensaje || 'La sesión venció. Vuelve a iniciar sesión.');
+          return;
+        }
+        throw new Error((r && r.mensaje) || 'No se pudo obtener respuesta de MARÍA.');
       }
+      previousResponseId = r.responseId || previousResponseId;
+      agregarBurbuja(r.texto, 'maria');
+      mostrarEstado('MARÍA está lista para escucharte.');
+      hablarRespuesta(r.texto);
+    } catch (e) {
+      mostrarEstado(e.message || 'Ocurrió un error al comunicarse con MARÍA.');
+    } finally {
+      activarControles(!!tokenMaria);
     }
+  }
 
-    function probarVoz() {
-      const SpeechRecognition =
-        window.SpeechRecognition ||
-        window.webkitSpeechRecognition;
-
-      if (!SpeechRecognition) {
-        resultado.textContent =
-          "Este navegador no soporta reconocimiento de voz.";
-        return;
-      }
-
-      const reconocimiento = new SpeechRecognition();
-
-      reconocimiento.lang = "es-CO";
-      reconocimiento.continuous = false;
-      reconocimiento.interimResults = false;
-
-      reconocimiento.onstart = () => {
-        resultado.textContent = "Escuchando... habla ahora.";
-      };
-
-      reconocimiento.onresult = (event) => {
-        resultado.textContent =
-          "VOZ RECONOCIDA: " +
-          event.results[0][0].transcript;
-      };
-
-      reconocimiento.onerror = (event) => {
-        resultado.textContent =
-          "ERROR DE VOZ: " + event.error;
-      };
-
-      reconocimiento.onend = () => {
-        console.log("Reconocimiento finalizado");
-      };
-
-      reconocimiento.start();
+  async function iniciarSesionMicrofono() {
+    const handoff = new URLSearchParams(location.search).get('handoff');
+    if (!handoff) {
+      mostrarEstado('Para entrar, inicia sesión en JAVELA CATÁLOGOS y abre MARÍA desde allí.');
+      return;
     }
-  </script>
+    try {
+      const r = await jsonp({api:'auth', handoff});
+      if (!r || !r.ok || !r.token) throw new Error((r && r.mensaje) || 'No se pudo validar el acceso.');
+      tokenMaria = r.token;
+      document.getElementById('usuario').textContent = r.nombre ? 'Conectada: ' + r.nombre : 'Sesión protegida de JAVELA';
+      history.replaceState({}, document.title, location.pathname);
+      activarControles(true);
+      mostrarEstado('Conexión lista. Puedes hablar con MARÍA.');
+    } catch (e) {
+      mostrarEstado(e.message || 'No se pudo abrir la sesión. Vuelve a iniciar sesión en JAVELA CATÁLOGOS.');
+      const enlace = document.createElement('a');
+      enlace.href = APP_URL;
+      enlace.textContent = ' Volver al acceso de JAVELA';
+      estado.appendChild(enlace);
+    }
+  }
+
+  hablar.addEventListener('click', () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      mostrarEstado('Este navegador no tiene reconocimiento de voz. Usa Google Chrome actualizado o escribe tu mensaje.');
+      return;
+    }
+    if (reconocimientoActivo) { reconocimientoActivo.stop(); return; }
+    const rec = new SpeechRecognition();
+    reconocimientoActivo = rec;
+    rec.lang = 'es-CO';
+    rec.continuous = false;
+    rec.interimResults = false;
+    hablar.disabled = true;
+    mostrarEstado('MARÍA te está escuchando...');
+    rec.onresult = (evento) => {
+      const texto = evento.results[0][0].transcript;
+      reconocimientoActivo = null;
+      enviarAMaria(texto);
+    };
+    rec.onerror = (evento) => {
+      reconocimientoActivo = null;
+      activarControles(!!tokenMaria);
+      const errores = {'not-allowed':'Permite el acceso al micrófono en Chrome.','no-speech':'No detecté voz. Inténtalo nuevamente.','audio-capture':'No se encontró un micrófono.','network':'El reconocimiento de voz perdió la conexión.'};
+      mostrarEstado(errores[evento.error] || ('Error de micrófono: ' + evento.error));
+    };
+    rec.onend = () => {
+      reconocimientoActivo = null;
+      if (tokenMaria && !hablar.disabled) mostrarEstado('MARÍA está lista para escucharte.');
+      activarControles(!!tokenMaria);
+    };
+    try { rec.start(); }
+    catch (e) { reconocimientoActivo = null; activarControles(!!tokenMaria); mostrarEstado('No se pudo iniciar el micrófono: ' + e.message); }
+  });
+
+  formulario.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const texto = mensaje.value.trim();
+    if (!texto) return;
+    mensaje.value = '';
+    enviarAMaria(texto);
+  });
+
+  cerrar.addEventListener('click', async () => {
+    cerrar.disabled = true;
+    if (reconocimientoActivo) reconocimientoActivo.stop();
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    try { if (tokenMaria) await jsonp({api:'logout', token:tokenMaria}); }
+    catch (e) { /* El cierre local continúa aunque falle la red. */ }
+    tokenMaria = '';
+    activarControles(false);
+    mostrarEstado('Sesión cerrada. Regresa a JAVELA CATÁLOGOS para ingresar nuevamente.');
+    cerrar.disabled = false;
+    const enlace = document.createElement('a');
+    enlace.href = APP_URL;
+    enlace.textContent = ' Volver al acceso';
+    estado.appendChild(enlace);
+  });
+
+  iniciarSesionMicrofono();
+</script>
 </body>
 </html>
