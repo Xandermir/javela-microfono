@@ -344,16 +344,7 @@
 <body>
 
     <div class="pantalla">
-
-        <div class="menu-cuenta">
-            <button class="boton-cuenta" id="botonCuenta" type="button" aria-expanded="false">♟ &nbsp; CUENTA &nbsp; ▾</button>
-            <div class="opciones-cuenta" id="opcionesCuenta">
-                <button type="button" id="opcionIniciar">↪ &nbsp; Iniciar sesión</button>
-                <button type="button" id="opcionCerrar" disabled>↩ &nbsp; Cerrar sesión</button>
-            </div>
-        </div>
-
-        <header class="encabezado">
+<header class="encabezado">
 
             <div class="logo-titulo">
 
@@ -453,7 +444,7 @@
 
                 <span class="separador-boton"></span>
 
-                <span>INICIAR SESIÓN</span>
+                <span>ENTRAR A MARÍA</span>
 
                 <span class="flechas">»</span>
 
@@ -466,64 +457,11 @@
         </footer>
 
     </div>
-
-
-    <div class="modal-acceso" id="modalAcceso" role="dialog" aria-modal="true" aria-labelledby="tituloAcceso">
-        <form class="formulario-acceso" id="formularioAcceso">
-            <h2 id="tituloAcceso">Bienvenida de nuevo</h2>
-            <p>Ingresa tus datos para continuar</p>
-            <label for="correoAcceso">Correo electrónico</label>
-            <input id="correoAcceso" type="email" placeholder="tu correo electrónico" autocomplete="username" required>
-            <label for="claveAcceso">Contraseña</label>
-            <input id="claveAcceso" type="password" placeholder="Tu contraseña" autocomplete="current-password" required>
-            <div class="acciones-acceso">
-                <button class="entrar-acceso" type="submit">INICIAR SESIÓN</button>
-                <button class="cancelar-acceso" id="cancelarAcceso" type="button">CANCELAR</button>
-            </div>
-            <div class="nota-acceso">Formulario visual de prueba. La validación segura de usuarios se conectará en la siguiente etapa.</div>
-        </form>
-    </div>
-
-    <script>
-        const botonCuenta = document.getElementById('botonCuenta');
-        const opcionesCuenta = document.getElementById('opcionesCuenta');
-        const modalAcceso = document.getElementById('modalAcceso');
-        const opcionCerrar = document.getElementById('opcionCerrar');
-        let sesionDemostracion = false;
-
-        function abrirAcceso() {
-            opcionesCuenta.classList.remove('visible');
-            botonCuenta.setAttribute('aria-expanded', 'false');
-            modalAcceso.classList.add('visible');
-            document.getElementById('correoAcceso').focus();
-        }
-        function actualizarMenu() {
-            opcionCerrar.disabled = !sesionDemostracion;
-            botonCuenta.innerHTML = sesionDemostracion ? '♟ &nbsp; MI CUENTA &nbsp; ▾' : '♟ &nbsp; CUENTA &nbsp; ▾';
-        }
-
-        botonCuenta.addEventListener('click', () => {
-            const abierto = opcionesCuenta.classList.toggle('visible');
-            botonCuenta.setAttribute('aria-expanded', String(abierto));
+<script>
+        // Acceso libre: entrar directamente al asistente MARÍA.
+        document.getElementById('botonPrincipal').addEventListener('click', () => {
+            window.location.href = 'asistente.html';
         });
-        document.getElementById('opcionIniciar').addEventListener('click', abrirAcceso);
-        document.getElementById('botonPrincipal').addEventListener('click', abrirAcceso);
-        document.getElementById('cancelarAcceso').addEventListener('click', () => modalAcceso.classList.remove('visible'));
-        modalAcceso.addEventListener('click', (evento) => {
-            if (evento.target === modalAcceso) modalAcceso.classList.remove('visible');
-        });
-        document.getElementById('formularioAcceso').addEventListener('submit', (evento) => {
-            evento.preventDefault();
-            alert('La pantalla de acceso está lista. En el siguiente paso conectaremos la validación real del correo y la contraseña.');
-        });
-        opcionCerrar.addEventListener('click', () => {
-            if (!sesionDemostracion) return;
-            sesionDemostracion = false;
-            actualizarMenu();
-            opcionesCuenta.classList.remove('visible');
-            alert('La sesión de demostración se ha cerrado.');
-        });
-        actualizarMenu();
     </script>
 </body>
 </html>
